@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "source": {
+    "project": "astryx",
+    "repository": "https://github.com/meta/astryx",
+    "package": "@astryxdesign/cli",
+    "license": "MIT",
+    "copyright": "Copyright (c) 2026 Meta Platforms, Inc.",
+    "extraction_command": "astryx template <id> --skeleton"
+  },
+  "snapshot": {
+    "cli_version": "0.7.11",
+    "core_version": "0.7.11",
+    "extracted_at": "2026-11-10",
+    "page_templates": 57,
+    "aggregate_sha256": "ac689c7396724889ec8f65936aa81654ca57a3cd61a62a30ddc561de4a01cfe9"
+  },
+  "refresh": {
+    "how": "Run scripts/update_templates.py. It resolves the astryx CLI, re-extracts every page skeleton, rewrites templates/pages/, regenerates templates/INDEX.md, and writes this file.",
+    "safe_by_default": "Dry-run first. Writing requires --write. A --version pin reproduces an exact release.",
+    "offline": "Runtime never uses the network. Only this refresh step does, and only when invoked explicitly."
+  }
+}

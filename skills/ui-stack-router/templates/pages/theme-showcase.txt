@@ -1,0 +1,43 @@
+# template: theme-showcase
+# name: Theme Showcase
+# description: Several unrelated product surfaces rendered together on one canvas so a token change can be judged across contexts at once. A comparison harness rather than a layout to ship.
+
+# theme-showcase - Several unrelated product surfaces rendered together on one canvas so a token change can be judged across contexts at once. A comparison harness rather than a layout to ship.
+# Components: AspectRatio, Badge, Banknote, Banner, Card, Center, ChatComposer, ChatMessage, ChatMessageBubble, ChatMessageList, ChatSystemMessage, CheckboxInput, CreditCard, Divider, Download, Folder, Grid, GridSpan, Item, LayoutGrid, List, Lock, MapPin, Mic, MoreMenu, NumberInput, OverflowList, Plus, RadioList, Search, Section, SelectableCard, Selector, ShoppingBag, Smartphone, Table, Tag, TextInput, TopNav, User, Wallet
+
+<StorePreview />
+<CardShowcase />
+<VStack gap={8}>
+  <HStack gap={4}>
+    <CheckoutCard />
+    <ChatCard />
+  </HStack>
+  <Grid gap={4} columns={columns}>
+    <GridSpan columns={isMobile ? 1 : 3}>
+      <InventoryCard />
+    </GridSpan>
+    <GridSpan columns={1}>
+      <LatestActivityCard />
+    </GridSpan>
+  </Grid>
+</VStack>
+<VStack gap={0}>
+  <TopNav />
+  <TopNavItem />
+  <TopNavItem />
+  <TopNavItem />
+  <TopNavItem />
+  <HStack gap={2}>
+    <HStack gap={0.5}>
+      <Button variant="ghost" />
+      <Button variant="ghost" />
+      <Button variant="ghost" />
+    </HStack>
+    <Button variant="primary" />
+  </HStack>
+  <Section padding={6} variant="transparent">
+    <VStack gap={10}>
+      <Center>
+        <VStack gap={4}>
+          <Text />
+          ...

@@ -1,0 +1,778 @@
+{
+  "_comment": "astryx 骨架组件 -> 目标框架组件映射。复合组件（MetricCard、ActiveUsersChart 等）不在此表，属模板自定义组合，由 agent 按角色实现。",
+  "layout": {
+    "VStack": {
+      "naive-ui": "n-space(vertical)",
+      "element-plus": "el-space(direction=vertical)",
+      "mui": "Stack(direction=column)",
+      "shadcn": "div.flex.flex-col",
+      "html": "div.stack-column"
+    },
+    "HStack": {
+      "naive-ui": "n-space",
+      "element-plus": "el-space",
+      "mui": "Stack(direction=row)",
+      "shadcn": "div.flex.items-center",
+      "html": "div.stack-row"
+    },
+    "Stack": {
+      "naive-ui": "n-space",
+      "element-plus": "el-space",
+      "mui": "Stack",
+      "shadcn": "div.flex",
+      "html": "div.stack"
+    },
+    "StackItem": {
+      "naive-ui": "n-space-item",
+      "element-plus": "el-space-item",
+      "mui": "Stack > child",
+      "shadcn": "div",
+      "html": "div"
+    },
+    "Grid": {
+      "naive-ui": "n-grid",
+      "element-plus": "el-row",
+      "mui": "Grid",
+      "shadcn": "div.grid",
+      "html": "div.grid"
+    },
+    "GridSpan": {
+      "naive-ui": "n-gi",
+      "element-plus": "el-col",
+      "mui": "Grid item",
+      "shadcn": "div.col-span-*",
+      "html": "div"
+    },
+    "Center": {
+      "naive-ui": "n-flex(justify=center)",
+      "element-plus": "el-row(justify=center)",
+      "mui": "Box(display=flex,justifyContent=center)",
+      "shadcn": "div.flex.items-center.justify-center",
+      "html": "div.center"
+    },
+    "Layout": {
+      "naive-ui": "n-layout",
+      "element-plus": "el-container",
+      "mui": "Box",
+      "shadcn": "div",
+      "html": "div.layout"
+    },
+    "LayoutHeader": {
+      "naive-ui": "n-layout-header",
+      "element-plus": "el-header",
+      "mui": "AppBar",
+      "shadcn": "header",
+      "html": "header"
+    },
+    "LayoutContent": {
+      "naive-ui": "n-layout-content",
+      "element-plus": "el-main",
+      "mui": "Box(component=main)",
+      "shadcn": "main",
+      "html": "main"
+    },
+    "LayoutFooter": {
+      "naive-ui": "n-layout-footer",
+      "element-plus": "el-footer",
+      "mui": "Box(component=footer)",
+      "shadcn": "footer",
+      "html": "footer"
+    },
+    "LayoutPanel": {
+      "naive-ui": "n-layout-sider",
+      "element-plus": "el-aside",
+      "mui": "Drawer",
+      "shadcn": "aside",
+      "html": "aside"
+    },
+    "Section": {
+      "naive-ui": "section",
+      "element-plus": "section",
+      "mui": "Box(component=section)",
+      "shadcn": "section",
+      "html": "section"
+    },
+    "Divider": {
+      "naive-ui": "n-divider",
+      "element-plus": "el-divider",
+      "mui": "Divider",
+      "shadcn": "Separator",
+      "html": "hr"
+    },
+    "AspectRatio": {
+      "naive-ui": "n-aspect-ratio",
+      "element-plus": "div.aspect-ratio",
+      "mui": "Box",
+      "shadcn": "div.aspect-video",
+      "html": "div"
+    },
+    "OverflowList": {
+      "naive-ui": "n-flex",
+      "element-plus": "el-space",
+      "mui": "Stack",
+      "shadcn": "div.flex.flex-wrap",
+      "html": "div"
+    }
+  },
+  "typography": {
+    "Text": {
+      "naive-ui": "n-text",
+      "element-plus": "el-text",
+      "mui": "Typography",
+      "shadcn": "p",
+      "html": "span"
+    },
+    "Heading": {
+      "naive-ui": "n-h1..n-h6",
+      "element-plus": "h1..h6",
+      "mui": "Typography(variant=h1..h6)",
+      "shadcn": "h1..h6",
+      "html": "h1..h6"
+    },
+    "Link": {
+      "naive-ui": "n-a",
+      "element-plus": "el-link",
+      "mui": "Link",
+      "shadcn": "a",
+      "html": "a"
+    },
+    "CodeBlock": {
+      "naive-ui": "n-code",
+      "element-plus": "el-text(tag=code)",
+      "mui": "Box(component=pre)",
+      "shadcn": "pre",
+      "html": "pre"
+    },
+    "Markdown": {
+      "naive-ui": "自定义渲染",
+      "element-plus": "自定义渲染",
+      "mui": "自定义渲染",
+      "shadcn": "自定义渲染",
+      "html": "div"
+    },
+    "VisuallyHidden": {
+      "naive-ui": "style=clip",
+      "element-plus": "style=clip",
+      "mui": "VisuallyHidden",
+      "shadcn": "span.sr-only",
+      "html": "span.sr-only"
+    }
+  },
+  "form": {
+    "Button": {
+      "naive-ui": "n-button",
+      "element-plus": "el-button",
+      "mui": "Button",
+      "shadcn": "Button",
+      "html": "button"
+    },
+    "IconButton": {
+      "naive-ui": "n-button(quaternary,circle)",
+      "element-plus": "el-button(circle)",
+      "mui": "IconButton",
+      "shadcn": "Button(size=icon)",
+      "html": "button.icon"
+    },
+    "TextInput": {
+      "naive-ui": "n-input",
+      "element-plus": "el-input",
+      "mui": "TextField",
+      "shadcn": "Input",
+      "html": "input"
+    },
+    "TextArea": {
+      "naive-ui": "n-input(type=textarea)",
+      "element-plus": "el-input(type=textarea)",
+      "mui": "TextField(multiline)",
+      "shadcn": "Textarea",
+      "html": "textarea"
+    },
+    "CheckboxInput": {
+      "naive-ui": "n-checkbox",
+      "element-plus": "el-checkbox",
+      "mui": "Checkbox",
+      "shadcn": "Checkbox",
+      "html": "input[type=checkbox]"
+    },
+    "CheckboxList": {
+      "naive-ui": "n-checkbox-group",
+      "element-plus": "el-checkbox-group",
+      "mui": "FormGroup",
+      "shadcn": "div",
+      "html": "div"
+    },
+    "CheckboxListItem": {
+      "naive-ui": "n-checkbox",
+      "element-plus": "el-checkbox",
+      "mui": "FormControlLabel+Checkbox",
+      "shadcn": "label",
+      "html": "label"
+    },
+    "RadioList": {
+      "naive-ui": "n-radio-group",
+      "element-plus": "el-radio-group",
+      "mui": "RadioGroup",
+      "shadcn": "RadioGroup",
+      "html": "div"
+    },
+    "RadioListItem": {
+      "naive-ui": "n-radio",
+      "element-plus": "el-radio",
+      "mui": "FormControlLabel+Radio",
+      "shadcn": "RadioGroupItem",
+      "html": "label"
+    },
+    "Switch": {
+      "naive-ui": "n-switch",
+      "element-plus": "el-switch",
+      "mui": "Switch",
+      "shadcn": "Switch",
+      "html": "input[type=checkbox]"
+    },
+    "Slider": {
+      "naive-ui": "n-slider",
+      "element-plus": "el-slider",
+      "mui": "Slider",
+      "shadcn": "Slider",
+      "html": "input[type=range]"
+    },
+    "Selector": {
+      "naive-ui": "n-select",
+      "element-plus": "el-select",
+      "mui": "Select",
+      "shadcn": "Select",
+      "html": "select"
+    },
+    "MultiSelector": {
+      "naive-ui": "n-select(multiple)",
+      "element-plus": "el-select(multiple)",
+      "mui": "Autocomplete(multiple)",
+      "shadcn": "Combobox",
+      "html": "select[multiple]"
+    },
+    "ComplexSelector": {
+      "naive-ui": "n-cascader",
+      "element-plus": "el-cascader",
+      "mui": "Autocomplete",
+      "shadcn": "Combobox",
+      "html": "select"
+    },
+    "DateInput": {
+      "naive-ui": "n-date-picker",
+      "element-plus": "el-date-picker",
+      "mui": "DatePicker(@mui/x-date-pickers)",
+      "shadcn": "Calendar+Popover",
+      "html": "input[type=date]"
+    },
+    "TimeInput": {
+      "naive-ui": "n-time-picker",
+      "element-plus": "el-time-picker",
+      "mui": "TimePicker(@mui/x-date-pickers)",
+      "shadcn": "Input",
+      "html": "input[type=time]"
+    },
+    "Typeahead": {
+      "naive-ui": "n-auto-complete",
+      "element-plus": "el-autocomplete",
+      "mui": "Autocomplete",
+      "shadcn": "Combobox",
+      "html": "input[list]"
+    },
+    "Field": {
+      "naive-ui": "n-form-item",
+      "element-plus": "el-form-item",
+      "mui": "FormControl",
+      "shadcn": "div.space-y-2",
+      "html": "div.field"
+    },
+    "FieldStatus": {
+      "naive-ui": "n-form-item-feedback",
+      "element-plus": "el-form-item(error)",
+      "mui": "FormHelperText",
+      "shadcn": "p.text-sm",
+      "html": "small"
+    },
+    "FormLayout": {
+      "naive-ui": "n-form",
+      "element-plus": "el-form",
+      "mui": "Box(component=form)",
+      "shadcn": "form",
+      "html": "form"
+    },
+    "SegmentedControl": {
+      "naive-ui": "n-radio-group(button)",
+      "element-plus": "el-radio-group",
+      "mui": "ToggleButtonGroup",
+      "shadcn": "Tabs",
+      "html": "div.segmented"
+    },
+    "SegmentedControlItem": {
+      "naive-ui": "n-radio-button",
+      "element-plus": "el-radio-button",
+      "mui": "ToggleButton",
+      "shadcn": "TabsTrigger",
+      "html": "button"
+    },
+    "ToggleButton": {
+      "naive-ui": "n-button",
+      "element-plus": "el-button",
+      "mui": "ToggleButton",
+      "shadcn": "Toggle",
+      "html": "button"
+    },
+    "ToggleButtonGroup": {
+      "naive-ui": "n-button-group",
+      "element-plus": "el-button-group",
+      "mui": "ToggleButtonGroup",
+      "shadcn": "ToggleGroup",
+      "html": "div"
+    },
+    "CommandPalette": {
+      "naive-ui": "n-modal + n-input",
+      "element-plus": "el-dialog + el-input",
+      "mui": "Dialog + TextField",
+      "shadcn": "Command",
+      "html": "dialog"
+    }
+  },
+  "data": {
+    "Table": {
+      "naive-ui": "n-data-table",
+      "element-plus": "el-table",
+      "mui": "Table",
+      "shadcn": "Table",
+      "html": "table"
+    },
+    "TableRow": {
+      "naive-ui": "n-data-table 行数据",
+      "element-plus": "el-table-column",
+      "mui": "TableRow",
+      "shadcn": "TableRow",
+      "html": "tr"
+    },
+    "TableCell": {
+      "naive-ui": "n-data-table 列定义",
+      "element-plus": "el-table-column",
+      "mui": "TableCell",
+      "shadcn": "TableCell",
+      "html": "td"
+    },
+    "TableBody": {
+      "naive-ui": "n-data-table",
+      "element-plus": "el-table",
+      "mui": "TableBody",
+      "shadcn": "TableBody",
+      "html": "tbody"
+    },
+    "GroupTable": {
+      "naive-ui": "n-data-table(tree)",
+      "element-plus": "el-table(row-key)",
+      "mui": "Table",
+      "shadcn": "Table",
+      "html": "table"
+    },
+    "TreeList": {
+      "naive-ui": "n-tree",
+      "element-plus": "el-tree",
+      "mui": "TreeView(@mui/x-tree-view)",
+      "shadcn": "Tree",
+      "html": "ul.tree"
+    },
+    "List": {
+      "naive-ui": "n-list",
+      "element-plus": "el-scrollbar+div",
+      "mui": "List",
+      "shadcn": "ul",
+      "html": "ul"
+    },
+    "ListItem": {
+      "naive-ui": "n-list-item",
+      "element-plus": "div.list-item",
+      "mui": "ListItem",
+      "shadcn": "li",
+      "html": "li"
+    },
+    "MetricCard": {
+      "naive-ui": "n-card + n-statistic",
+      "element-plus": "el-card + el-statistic",
+      "mui": "Card + Typography",
+      "shadcn": "Card",
+      "html": "div.stat"
+    },
+    "Badge": {
+      "naive-ui": "n-badge",
+      "element-plus": "el-badge",
+      "mui": "Badge",
+      "shadcn": "Badge",
+      "html": "span.badge"
+    },
+    "StatusDot": {
+      "naive-ui": "n-badge(dot)",
+      "element-plus": "el-badge(is-dot)",
+      "mui": "Badge(variant=dot)",
+      "shadcn": "span.rounded-full",
+      "html": "span.dot"
+    },
+    "Avatar": {
+      "naive-ui": "n-avatar",
+      "element-plus": "el-avatar",
+      "mui": "Avatar",
+      "shadcn": "Avatar",
+      "html": "img.avatar"
+    },
+    "Timestamp": {
+      "naive-ui": "n-text(depth=3)",
+      "element-plus": "el-text(type=info)",
+      "mui": "Typography(variant=caption)",
+      "shadcn": "time",
+      "html": "time"
+    },
+    "ProgressBar": {
+      "naive-ui": "n-progress",
+      "element-plus": "el-progress",
+      "mui": "LinearProgress",
+      "shadcn": "Progress",
+      "html": "progress"
+    },
+    "Spinner": {
+      "naive-ui": "n-spin",
+      "element-plus": "v-loading",
+      "mui": "CircularProgress",
+      "shadcn": "Spinner",
+      "html": "div.spinner"
+    },
+    "EmptyState": {
+      "naive-ui": "n-empty",
+      "element-plus": "el-empty",
+      "mui": "Box+Typography",
+      "shadcn": "div.text-center",
+      "html": "div.empty"
+    },
+    "GalleryCard": {
+      "naive-ui": "n-card",
+      "element-plus": "el-card",
+      "mui": "Card",
+      "shadcn": "Card",
+      "html": "div.card"
+    },
+    "ImageGallery": {
+      "naive-ui": "n-image-group",
+      "element-plus": "el-image",
+      "mui": "ImageList",
+      "shadcn": "div.grid",
+      "html": "div.grid"
+    },
+    "ImageGrid": {
+      "naive-ui": "n-grid",
+      "element-plus": "el-row",
+      "mui": "ImageList",
+      "shadcn": "div.grid",
+      "html": "div.grid"
+    },
+    "Card": {
+      "naive-ui": "n-card",
+      "element-plus": "el-card",
+      "mui": "Card",
+      "shadcn": "Card",
+      "html": "div.card"
+    },
+    "CardHeading": {
+      "naive-ui": "n-card-header",
+      "element-plus": "el-card-header",
+      "mui": "CardHeader",
+      "shadcn": "CardHeader",
+      "html": "div.card-header"
+    },
+    "ClickableCard": {
+      "naive-ui": "n-card(hoverable)",
+      "element-plus": "el-card(shadow=hover)",
+      "mui": "CardActionArea",
+      "shadcn": "Card",
+      "html": "a.card"
+    },
+    "Collapsible": {
+      "naive-ui": "n-collapse",
+      "element-plus": "el-collapse",
+      "mui": "Accordion",
+      "shadcn": "Accordion",
+      "html": "details"
+    },
+    "MetadataList": {
+      "naive-ui": "n-descriptions",
+      "element-plus": "el-descriptions",
+      "mui": "List",
+      "shadcn": "dl",
+      "html": "dl"
+    },
+    "MetadataListItem": {
+      "naive-ui": "n-descriptions-item",
+      "element-plus": "el-descriptions-item",
+      "mui": "ListItem",
+      "shadcn": "div",
+      "html": "div"
+    },
+    "TotalRow": {
+      "naive-ui": "n-data-table(summary)",
+      "element-plus": "el-table(summary-method)",
+      "mui": "TableFooter",
+      "shadcn": "TableFooter",
+      "html": "tfoot"
+    },
+    "Thumbnail": {
+      "naive-ui": "n-image",
+      "element-plus": "el-image",
+      "mui": "Box(component=img)",
+      "shadcn": "img",
+      "html": "img"
+    }
+  },
+  "navigation": {
+    "Tabs": {
+      "naive-ui": "n-tabs",
+      "element-plus": "el-tabs",
+      "mui": "Tabs",
+      "shadcn": "Tabs",
+      "html": "div[role=tablist]"
+    },
+    "Tab": {
+      "naive-ui": "n-tab-pane",
+      "element-plus": "el-tab-pane",
+      "mui": "Tab",
+      "shadcn": "TabsTrigger",
+      "html": "button[role=tab]"
+    },
+    "TabList": {
+      "naive-ui": "n-tabs",
+      "element-plus": "el-tabs",
+      "mui": "Tabs",
+      "shadcn": "TabsList",
+      "html": "div[role=tablist]"
+    },
+    "Breadcrumbs": {
+      "naive-ui": "n-breadcrumb",
+      "element-plus": "el-breadcrumb",
+      "mui": "Breadcrumbs",
+      "shadcn": "Breadcrumb",
+      "html": "nav"
+    },
+    "BreadcrumbItem": {
+      "naive-ui": "n-breadcrumb-item",
+      "element-plus": "el-breadcrumb-item",
+      "mui": "Breadcrumbs+Link",
+      "shadcn": "BreadcrumbItem",
+      "html": "a"
+    },
+    "SideNav": {
+      "naive-ui": "n-menu(vertical)",
+      "element-plus": "el-menu",
+      "mui": "Drawer+List",
+      "shadcn": "aside+nav",
+      "html": "nav.side"
+    },
+    "SideNavItem": {
+      "naive-ui": "n-menu-item",
+      "element-plus": "el-menu-item",
+      "mui": "ListItemButton",
+      "shadcn": "a",
+      "html": "a"
+    },
+    "SideNavSection": {
+      "naive-ui": "n-menu-group",
+      "element-plus": "el-menu-item-group",
+      "mui": "ListSubheader",
+      "shadcn": "div",
+      "html": "div"
+    },
+    "SideNavHeading": {
+      "naive-ui": "n-menu-header",
+      "element-plus": "div.menu-heading",
+      "mui": "Typography",
+      "shadcn": "h2",
+      "html": "h2"
+    },
+    "TopNav": {
+      "naive-ui": "n-menu(horizontal)",
+      "element-plus": "el-menu(mode=horizontal)",
+      "mui": "AppBar+Toolbar",
+      "shadcn": "header+nav",
+      "html": "nav.top"
+    },
+    "TopNavItem": {
+      "naive-ui": "n-menu-item",
+      "element-plus": "el-menu-item",
+      "mui": "Button",
+      "shadcn": "a",
+      "html": "a"
+    },
+    "TopNavHeading": {
+      "naive-ui": "n-menu-header",
+      "element-plus": "div.nav-brand",
+      "mui": "Typography",
+      "shadcn": "span",
+      "html": "span"
+    },
+    "TopNavMegaMenu": {
+      "naive-ui": "n-popover+n-grid",
+      "element-plus": "el-popover+el-row",
+      "mui": "Menu",
+      "shadcn": "NavigationMenu",
+      "html": "div.mega"
+    },
+    "NavIcon": {
+      "naive-ui": "n-icon",
+      "element-plus": "el-icon",
+      "mui": "Icon",
+      "shadcn": "span",
+      "html": "span"
+    },
+    "Icon": {
+      "naive-ui": "n-icon",
+      "element-plus": "el-icon",
+      "mui": "Icon(@mui/icons-material)",
+      "shadcn": "lucide 图标",
+      "html": "svg"
+    },
+    "PageHeader": {
+      "naive-ui": "n-page-header",
+      "element-plus": "el-page-header",
+      "mui": "Typography+Divider",
+      "shadcn": "div",
+      "html": "header"
+    },
+    "Toolbar": {
+      "naive-ui": "n-flex",
+      "element-plus": "el-space",
+      "mui": "Toolbar",
+      "shadcn": "div.flex",
+      "html": "div.toolbar"
+    },
+    "PowerSearch": {
+      "naive-ui": "n-input + n-dropdown",
+      "element-plus": "el-autocomplete",
+      "mui": "Autocomplete",
+      "shadcn": "Command",
+      "html": "div.search"
+    },
+    "SegmentedControlItem": {
+      "naive-ui": "n-radio-button",
+      "element-plus": "el-radio-button",
+      "mui": "ToggleButton",
+      "shadcn": "TabsTrigger",
+      "html": "button"
+    }
+  },
+  "overlay": {
+    "Dialog": {
+      "naive-ui": "n-modal",
+      "element-plus": "el-dialog",
+      "mui": "Dialog",
+      "shadcn": "Dialog",
+      "html": "dialog"
+    },
+    "DialogHeader": {
+      "naive-ui": "n-modal-header",
+      "element-plus": "el-dialog(title)",
+      "mui": "DialogTitle",
+      "shadcn": "DialogHeader",
+      "html": "header"
+    },
+    "Popover": {
+      "naive-ui": "n-popover",
+      "element-plus": "el-popover",
+      "mui": "Popover",
+      "shadcn": "Popover",
+      "html": "div.popover"
+    },
+    "DropdownMenu": {
+      "naive-ui": "n-dropdown",
+      "element-plus": "el-dropdown",
+      "mui": "Menu",
+      "shadcn": "DropdownMenu",
+      "html": "div.menu"
+    },
+    "DropdownMenuItem": {
+      "naive-ui": "n-dropdown-option",
+      "element-plus": "el-dropdown-item",
+      "mui": "MenuItem",
+      "shadcn": "DropdownMenuItem",
+      "html": "button"
+    },
+    "DropdownMenuDivider": {
+      "naive-ui": "n-dropdown-divider",
+      "element-plus": "el-dropdown-menu(divider)",
+      "mui": "Divider",
+      "shadcn": "DropdownMenuSeparator",
+      "html": "hr"
+    },
+    "DropdownMenuCheckboxItem": {
+      "naive-ui": "n-dropdown-option(checkbox)",
+      "element-plus": "el-dropdown-item",
+      "mui": "MenuItem(role=menuitemcheckbox)",
+      "shadcn": "DropdownMenuCheckboxItem",
+      "html": "button"
+    },
+    "DropdownMenuRadioGroup": {
+      "naive-ui": "n-dropdown(group)",
+      "element-plus": "el-dropdown-item",
+      "mui": "MenuList",
+      "shadcn": "DropdownMenuRadioGroup",
+      "html": "div"
+    },
+    "DropdownMenuSubMenu": {
+      "naive-ui": "n-dropdown(children)",
+      "element-plus": "el-sub-menu",
+      "mui": "Menu",
+      "shadcn": "DropdownMenuSub",
+      "html": "div"
+    },
+    "Tooltip": {
+      "naive-ui": "n-tooltip",
+      "element-plus": "el-tooltip",
+      "mui": "Tooltip",
+      "shadcn": "Tooltip",
+      "html": "span[title]"
+    },
+    "Stepper": {
+      "naive-ui": "n-steps",
+      "element-plus": "el-steps",
+      "mui": "Stepper",
+      "shadcn": "div",
+      "html": "ol.steps"
+    },
+    "Step": {
+      "naive-ui": "n-step",
+      "element-plus": "el-step",
+      "mui": "Step",
+      "shadcn": "li",
+      "html": "li"
+    },
+    "SectionHeading": {
+      "naive-ui": "n-h3",
+      "element-plus": "h3",
+      "mui": "Typography(variant=h3)",
+      "shadcn": "h3",
+      "html": "h3"
+    },
+    "Banner": {
+      "naive-ui": "n-alert",
+      "element-plus": "el-alert",
+      "mui": "Alert",
+      "shadcn": "Alert",
+      "html": "div.alert"
+    },
+    "Outline": {
+      "naive-ui": "n-anchor",
+      "element-plus": "el-anchor",
+      "mui": "List",
+      "shadcn": "nav",
+      "html": "nav.toc"
+    },
+    "ResizeHandle": {
+      "naive-ui": "n-split",
+      "element-plus": "el-splitter",
+      "mui": "Box",
+      "shadcn": "div[role=separator]",
+      "html": "div[role=separator]"
+    }
+  }
+}
