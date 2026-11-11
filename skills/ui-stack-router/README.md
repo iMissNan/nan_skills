@@ -70,6 +70,24 @@ python "$SKILL_DIR/scripts/pick_template.py" --list
 - **运行时零网络**：模板、组件映射、选型数据全部随包提供，断网可用。
 - 无需 Node。仅"更新模板快照"这一步需要 Node（用 astryx CLI 重新抽取）。
 
+## 内置风格库
+
+内置 **143 种设计风格**的离线快照（来源 [luckymaomi/ui](https://github.com/luckymaomi/ui)，MIT），
+每种风格含中文说明、配色、AI 实现规则、设计 token、组件配方（Tailwind 类）。
+
+```bash
+# 按气质搜风格
+python "$SKILL_DIR/scripts/search_style.py" "拟物"
+
+# 取完整规则与组件配方
+python "$SKILL_DIR/scripts/search_style.py" --slug skeuomorphism
+
+# 列出全部 143 种
+python "$SKILL_DIR/scripts/search_style.py" --list
+```
+
+运行时零网络；快照更新随仓库版本走。
+
 ## 模板更新机制
 
 模板是**随包分发的离线快照**，不联网、不依赖 astryx 安装即可用。
@@ -158,9 +176,11 @@ ui-stack-router/
 │   └── update_templates.py     模板快照更新（dry-run 默认）
 └── templates/
     ├── INDEX.md                57 个模板索引
-    ├── snapshot.json           快照元数据（版本/日期/校验和）
+    ├── snapshot.json           模板快照元数据（版本/日期/校验和）
     ├── component-map.json      108 个原子组件 → 5 种目标库
-    └── pages/*.txt             57 个布局骨架
+    ├── pages/*.txt             57 个布局骨架
+    ├── styles.json.gz          143 种设计风格离线快照（luckymaomi/ui，MIT）
+    └── styles-snapshot.json    风格快照元数据（来源/日期/校验和）
 ```
 
 ## 选型依据
@@ -195,7 +215,10 @@ curl -s "https://api.github.com/repos/tusen-ai/naive-ui"
 
 ## 许可证
 
-MIT。模板骨架来自 [meta/astryx](https://github.com/meta/astryx)（MIT），版权归 Meta Platforms, Inc.，完整归因见 [LICENSE](LICENSE)。
+MIT。含两个第三方数据来源，均 MIT，完整归因见 [LICENSE](LICENSE)：
+
+- 页面模板骨架：[meta/astryx](https://github.com/meta/astryx)，版权归 Meta Platforms, Inc.
+- 设计风格库：[luckymaomi/ui](https://github.com/luckymaomi/ui)，143 种风格规则与组件配方
 
 ## 贡献
 

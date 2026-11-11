@@ -161,28 +161,56 @@ python "$SKILL_DIR/scripts/pick_template.py" --list
 1. 选模板 → 拿到骨架
 2. 照骨架的**嵌套层级和 gap/padding 数值**搭结构，不要自己重新设计间距
 3. 把骨架里的组件名换成目标库的对应组件（用 `component-map.json`）
-4. 再套第三步的配色与字体 token
+4. 再套第四步选定风格的配色与 token
 5. 最后填真实内容
 
 **不许跳步**：直接从零手写页面，等于放弃模板带来的全部布局质量。
 
-### 第四步：拿设计方向（配色与字体）
+### 第四步：拿设计方向（风格与配色）
 
-> **可选步骤。** 需要同级安装 `ui-ux-pro-max` 技能（14.7 万星的 UI 设计规则库）。
-> 未安装时跳过本步，直接使用目标库的主题默认配色——但**不要跳过第三步的模板**。
+本 skill 内置**离线风格库**：143 种设计风格（来源
+[luckymaomi/ui](https://github.com/luckymaomi/ui)，MIT），每种含中文说明、配色、
+AI 实现规则、设计 token 和组件配方（Tailwind 实现）。运行时零网络。
 
-先确认可用性：`route_stack.py` 输出的 `plan.design_search_available` 为 `true` 时，
-`plan.design_search_command` 给出可直接执行的命令；为 `false` 时说明未安装，跳过本步。
+**按产品气质选风格：**
+
+```bash
+python "$SKILL_DIR/scripts/search_style.py" "<气质或产品关键词>"
+# 例：拟物 / 玻璃 / 极简 / dashboard / skeuomorphism / 温暖
+```
+
+返回命中风格列表。选定后取完整条目：
+
+```bash
+python "$SKILL_DIR/scripts/search_style.py" --slug <风格id>
+```
+
+完整条目包含：
+
+| 字段 | 用途 |
+| --- | --- |
+| `aiRules` | **该风格的 AI 实现规则**（必读：绝对禁止/必须遵守/光影/动效） |
+| `colors` | 主色、次色、强调色 hex |
+| `tokens` | border / shadow / interaction / typography / spacing 令牌 |
+| `recipe` | button / card / input 等组件的 Tailwind 类配方（骨架+变体+状态） |
+| `doList` / `dontList` | 该风格该做与不该做 |
+| `examplePrompts` | 示例提示词 |
+
+**风格选择规则：**
+
+1. 用户点名风格（"要拟物"、"要玻璃拟态"）→ 直接 `--slug` 取用。
+2. 用户没点名 → 用产品关键词搜，**取第一名前先向用户确认气质方向**，
+   报出 2-3 个候选（中文名 + 一句话）让用户挑。
+3. 风格决定的是视觉语言，组件库决定的是实现手段，**两者叠加使用**：
+   配色取 `colors`，间距圆角取 `tokens`，组件细节参考 `recipe` 的类名，
+   再落到所选组件库上。
+
+**可选补充**：`ui-ux-pro-max` 技能（若安装）可提供字体搭配与 UX 规则清单，
+与本风格库互补。`route_stack.py` 输出的 `plan.design_search_available` 指示其
+是否可用；未安装时跳过即可，风格库已够用。
 
 ```bash
 python "$UIUX_SKILL/scripts/search.py" "<产品关键词>" --design-system -p "<项目名>"
-```
-
-返回配色、字体搭配（含 Google Fonts 链接）、风格方向、交付前检查清单。
-按框架查实现要点：
-
-```bash
-python "$UIUX_SKILL/scripts/search.py" "<组件或问题>" --stack vue
 ```
 
 ### 第五步：用库写，不要手搓
@@ -195,7 +223,7 @@ python "$UIUX_SKILL/scripts/search.py" "<组件或问题>" --stack vue
   和随意 `px`。
 - 库有主题对象时（naive-ui 的 `themeOverrides`、astryx 的 theme），
   **改主题**，不要逐个组件覆写样式。
-- 把第四步的设计方向（配色、字体）映射进库的主题，而不是绕开库另写一套。
+- 把第四步选定的风格（配色、token、组件配方）映射进库的主题，而不是绕开库另写一套。
 
 ## 模板快照与更新
 

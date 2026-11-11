@@ -63,6 +63,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+### Luckymaomi UI style library
+
+The design-style snapshot bundled at `templates/styles.json.gz` (143 styles
+with AI implementation rules, tokens and Tailwind component recipes) is
+derived from the luckymaomi/ui project, extracted from
+`src/content/data/styles.json` on 2026-11-11.
+
+- Source: https://github.com/luckymaomi/ui
+- Site: https://luckymaomi.github.io/ui/
+- License: MIT
+
+The snapshot drops English duplicate fields and page-only metadata; all
+retained content (Chinese rules, tokens, recipes) originates from that
+project. Its MIT license applies to the retained data.
+
 ### Library download figures
 
 The npm weekly download counts and GitHub star counts quoted in

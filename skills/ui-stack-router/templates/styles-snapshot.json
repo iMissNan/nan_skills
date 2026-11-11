@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "source": {
+    "project": "luckymaomi/ui 风格库",
+    "site": "https://luckymaomi.github.io/ui/",
+    "repository": "https://github.com/luckymaomi/ui",
+    "data_path": "src/content/data/styles.json",
+    "license": "MIT",
+    "fetched_at": "2026-11-11"
+  },
+  "snapshot": {
+    "styles": 143,
+    "original_bytes": 5154068,
+    "slim_bytes": 3080034,
+    "gzip_bytes": 674502,
+    "sha256": "6695630ebe7031c1f752b70d8b87e97cef82d809cc5f68596fa55443fdbf08d6",
+    "dropped_fields": [
+      "aiRulesEn",
+      "atoms",
+      "cover",
+      "descriptionEn",
+      "doListEn",
+      "dontListEn",
+      "keywordsEn",
+      "meta",
+      "philosophyEn"
+    ]
+  }
+}
