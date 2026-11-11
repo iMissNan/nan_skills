@@ -34,10 +34,13 @@ templates of the Astryx design system, extracted via
 - License: MIT
 - Copyright (c) 2026 Meta Platforms, Inc.
 
-The skeletons contain only layout structure and spacing values (component
-nesting, `padding`, `gap`). They contain no React source, no compiled CSS, and
-no Astryx component implementations. The Astryx MIT license text is reproduced
-below as required by its terms.
+The skeletons contain layout structure and spacing values (component nesting,
+`padding`, `gap`, `columns`) and the Astryx component names those values apply
+to. Attribute values keep their JSX expression syntax (`padding={6}`,
+`columns={{minWidth: 320}})`, so they are a structural reference to be rewritten
+per target framework, not directly runnable source. They contain no React
+component implementations and no compiled CSS. The Astryx MIT license text is
+reproduced below as required by its terms.
 
 ```
 MIT License

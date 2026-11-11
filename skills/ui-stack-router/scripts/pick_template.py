@@ -57,6 +57,11 @@ INTENT = {
     "文件": ["file-explorer"],
     "通知": ["table-inbox"],
     "收件": ["table-inbox"],
+    "课程": ["course-detail"],
+    "培训": ["course-detail"],
+    "报名": ["course-detail", "checkout-wizard"],
+    "课程详情": ["course-detail"],
+    "课程页": ["course-detail"],
     "dashboard": ["dashboard", "dashboard-scorecard", "dashboard-comparison"],
     "admin": ["dashboard", "dashboard-scorecard", "shell-side-nav"],
     "login": ["login", "login-card", "login-split", "login-sso"],
@@ -129,6 +134,7 @@ CATEGORY_ZH = {
     "form-two-column": "双列表单",
     "form-wizard-vertical": "垂直分步表单",
     "work-item-detail": "工作项详情",
+    "course-detail": "课程详情/报名页",
 }
 
 LIBRARY_KEY = {
@@ -165,19 +171,41 @@ def load_index():
 
 
 def score(query, pages):
-    q = query.lower()
+    """Rank templates for a query.
+
+    Matching is whole-token for ASCII so that "ide" does not match
+    "side-gallery", "ai" does not match "email", and "form" does not match
+    "information". Chinese has no word separators, so CJK intent words keep
+    substring matching. An exact template id wins outright.
+    """
+    q = query.lower().strip()
+    if q in pages:
+        return [q] + [tid for tid in pages if tid != q]
+
+    tokens = set(re.findall(r"[a-z0-9][a-z0-9-]*", q))
     hits = {}
     for word, ids in INTENT.items():
-        if word in q:
-            for rank, tid in enumerate(ids):
-                hits[tid] = hits.get(tid, 0) + (len(ids) - rank)
-    # direct id or english name matches win
+        if word.isascii():
+            matched = word in tokens
+            specificity = 0
+        else:
+            matched = word in q
+            # A longer CJK phrase is a more specific intent: "课程详情" should
+            # outrank the generic "详情" it contains.
+            specificity = 20 if len(word) >= 3 else 0
+        if not matched:
+            continue
+        for rank, tid in enumerate(ids):
+            hits[tid] = hits.get(tid, 0) + (len(ids) - rank) + specificity
+
+    # A template's own id or name only counts when it appears as a whole token.
     for tid, info in pages.items():
-        if tid in q:
+        if tid in tokens:
             hits[tid] = hits.get(tid, 0) + 100
-        name = (info["name"] or "").lower()
-        if name and name in q:
+        words = set(re.findall(r"[a-z0-9][a-z0-9-]*", (info["name"] or "").lower()))
+        if words and words <= tokens:
             hits[tid] = hits.get(tid, 0) + 50
+
     ranked = sorted(hits.items(), key=lambda kv: (-kv[1], kv[0]))
     return [tid for tid, _ in ranked if tid in pages]
 
@@ -224,11 +252,31 @@ def main(argv):
               "templates": [{"id": p["id"], "zh": p["zh"]} for p in pages.values()]})
         return 0
 
-    query = args[0]
+    query = None
     library = "html"
-    if "--library" in args:
-        raw = args[args.index("--library") + 1]
-        library = LIBRARY_KEY.get(raw, "html")
+    idx = 0
+    while idx < len(args):
+        arg = args[idx]
+        if arg == "--library":
+            if idx + 1 >= len(args) or args[idx + 1].startswith("--"):
+                emit({"ok": False, "error": "missing_library_value",
+                      "detail": "--library 需要一个值，可选：" + ", ".join(LIBRARY_KEY)})
+                return 2
+            raw = args[idx + 1]
+            if raw not in LIBRARY_KEY:
+                emit({"ok": False, "error": "unknown_library", "library": raw,
+                      "available": list(LIBRARY_KEY)})
+                return 2
+            library = LIBRARY_KEY[raw]
+            idx += 2
+            continue
+        if query is None:
+            query = arg
+        idx += 1
+
+    if query is None:
+        emit({"ok": False, "error": "missing_query"})
+        return 2
 
     pages = load_index()
     if not pages:
@@ -252,7 +300,7 @@ def main(argv):
         "chosen": {"id": top, "name": info["name"], "zh": info["zh"]},
         "alternatives": [{"id": t, "zh": pages[t]["zh"]} for t in ranked[1:4]],
         "skeleton": skeleton,
-        "translated": translate(skeleton, library),
+        "annotated": translate(skeleton, library),
     })
     return 0
 

@@ -16,7 +16,7 @@ AI 写 UI 显丑，通常不是不会写 CSS，而是**没做布局决策**。�
 |---|---|
 | 1. 探测框架 | 读 `package.json`，认出 React / Vue / Nuxt / Svelte / Angular / uni-app |
 | 2. 按数据选库 | 依据真实下载量与星数，不做凭印象的推荐；项目已有库则直接复用 |
-| 3. 套页面模板 | 用 57 个框架无关的布局骨架搭结构，再把组件名映射到目标库 |
+| 3. 套页面模板 | 用 58 个布局骨架搭结构，再把组件名映射到目标库 |
 
 ## 关键区别：组件库 vs 设计规则库
 
@@ -31,9 +31,11 @@ AI 写 UI 显丑，通常不是不会写 CSS，而是**没做布局决策**。�
 
 ## 为什么内置模板骨架
 
-`astryx`（Meta 的设计系统）开箱好看，很大程度来自它附带 **57 个页面模板 + 711 个区块模板**（免费，一条命令生成）。而 MUI、Naive UI、Element Plus **都不带页面模板**，只发组件。
+`astryx`（Meta 的设计系统）开箱好看，很大程度来自它附带 **58 个页面模板 + 721 个区块模板**（免费，一条命令生成）。而 MUI、Naive UI、Element Plus **都不带页面模板**，只发组件。
 
-本技能把 astryx 的模板用 `--skeleton` 抽成**框架无关的布局骨架**——只有嵌套层级和 `padding`／`gap` 数值，不含任何 React 语法——于是任何框架都能复用同一套布局成果。
+本技能把 astryx 的模板用 `--skeleton` 抽成**布局骨架**——保留嵌套层级和 `padding`／`gap`／`columns` 的语义值，组件名仍是 astryx 的，属性仍是 JSX 写法（`padding={6}`），需按目标框架改写语法。
+
+> **两个使用约束**（见 SKILL.md 第三步）：骨架最多 35 行，超出部分以 `...` 标记，须按模板 `description` 补全；`MetricCard` 等复合件不在映射表中，需按角色自行实现。
 
 ## 安装
 
@@ -56,7 +58,7 @@ python "$SKILL_DIR/scripts/route_stack.py" "<项目目录>"
 # 按产品描述选页面模板（支持中文）
 python "$SKILL_DIR/scripts/pick_template.py" "后台管理系统 带表格和筛选" --library naive-ui
 
-# 列出全部 57 个模板
+# 列出全部 58 个模板
 python "$SKILL_DIR/scripts/pick_template.py" --list
 ```
 
@@ -69,6 +71,14 @@ python "$SKILL_DIR/scripts/pick_template.py" --list
 - **Python 3.8+**，仅用标准库，无第三方依赖。
 - **运行时零网络**：模板、组件映射、选型数据全部随包提供，断网可用。
 - 无需 Node。仅"更新模板快照"这一步需要 Node（用 astryx CLI 重新抽取）。
+
+## 测试
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+16 项回归测试覆盖模板匹配、路由决策与异常输入。改动 `scripts/` 后请先跑它。
 
 ## 内置风格库
 
@@ -104,8 +114,8 @@ python "$SKILL_DIR/scripts/update_templates.py" --check
 {
   "cli_version": "0.7.11",
   "snapshot_version": "0.7.11",
-  "template_count_local": 57,
-  "template_count_upstream": 57,
+  "template_count_local": 58,
+  "template_count_upstream": 58,
   "local_matches_snapshot": true,
   "version_drift": false
 }
@@ -146,7 +156,7 @@ python "$SKILL_DIR/scripts/update_templates.py" --version 0.7.11 --write
   "snapshot": {
     "cli_version": "0.7.11",
     "extracted_at": "2026-11-10",
-    "page_templates": 57,
+    "page_templates": 58,
     "aggregate_sha256": "ac689c73..."
   }
 }
@@ -172,13 +182,16 @@ ui-stack-router/
 ├── scripts/
 │   ├── detect_stack.py         框架探测
 │   ├── route_stack.py          选型路由（含权衡信息）
-│   ├── pick_template.py        模板选取 + 组件名翻译
+│   ├── pick_template.py        模板选取 + 组件名标注
+│   ├── search_style.py         设计风格检索（143 种）
 │   └── update_templates.py     模板快照更新（dry-run 默认）
+├── tests/
+│   └── test_routing.py         回归测试（16 项）
 └── templates/
-    ├── INDEX.md                57 个模板索引
+    ├── INDEX.md                58 个模板索引
     ├── snapshot.json           模板快照元数据（版本/日期/校验和）
-    ├── component-map.json      108 个原子组件 → 5 种目标库
-    ├── pages/*.txt             57 个布局骨架
+    ├── component-map.json      109 个原子组件 → 5 种目标库
+    ├── pages/*.txt             58 个布局骨架
     ├── styles.json.gz          143 种设计风格离线快照（luckymaomi/ui，MIT）
     └── styles-snapshot.json    风格快照元数据（来源/日期/校验和）
 ```

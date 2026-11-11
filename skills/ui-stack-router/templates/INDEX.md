@@ -1,9 +1,10 @@
 # 页面模板索引
 
-来源：astryx design system 0.7.11 的 `template --skeleton` 输出。
-骨架只含布局结构与间距数值，**不含任何 React 语法**，可映射到任意框架。
+来源：astryx design system 0.7.13 的 `template --skeleton` 输出。
+骨架保留布局结构与间距数值（`padding`、`gap`、`columns`），**属性仍是 JSX 写法**（如 `padding={6}`），需按目标框架改写语法。
+上游最多输出 35 行，超出部分以 `...` 省略，须按 description 自行补全。
 
-共 57 个页面模板，711 个区块模板。
+共 58 个页面模板，721 个区块模板。
 
 > 更新：`python scripts/update_templates.py --write`。本文件与 `snapshot.json` 由该脚本重新生成。
 
@@ -25,6 +26,7 @@
 | `table-collapsible` | Collapsible Table | Several tables on one page, each in a collapsible card with its own columns — for groups that do not share a schema, where one table would stand full of empty cells. One time range drives them all, and rows expand into a history chart. Accounts, integrations, sections, sort, expand, or collapse. |
 | `table-comparison` | Comparison Table | Transposed matrix that puts candidates in the columns and criteria in grouped rows, with a pinned label column that survives horizontal scroll, columns you can swap or add, and best-in-row marks you can toggle. Compare, comparison, matrix, spec sheet, feature grid, pricing table, benchmark, frozen column, sticky column, or side-by-side. |
 | `contact-form` | Contact Form | Flat single-column form mixing control types (text, pill toggles, dropdowns, long free-text) landing on one full-width submit. No steps, no branching, no summary rail. |
+| `course-detail` | Course Detail | Long-form sales page for a single offering, in two columns — read the pitch, then enroll from a sticky rail. The main column holds a preview poster with a fact row, an about block with skill chips, a module syllabus whose sections collapse module by module, an instructor card, reviews with a scored-aspects panel, and a FAQ; the rail holds the price, a self-paced or cohort start picker, and a weekly-pace slider that computes a finish date. The shape for any offering with a curriculum and a purchase panel — a course, class, masterclass, bootcamp, workshop, or training. |
 | `dashboard-comparison` | Data Dashboard | Comparison-heavy analytics behind a persistent filter bar: tiles that each carry an inline sparkline and several period-over-period deltas, then segmented breakdowns underneath. Every number is shown against another number. |
 | `form-wizard-dialog` | Dialog Wizard | Step through a short flow in a dialog, overlay, or popup launched from the page underneath, which stays where it was. Compact step markers and a pinned action row inside a constrained width, rather than the full page a wizard usually gets. Best for two to four short steps — setup, invite, schedule, onboarding — where losing the context underneath would cost more than the flow is worth. |
 | `documentation` | Documentation Catalog | Reference landing that is pure wayfinding: a banner above a grid of category cards linking into sections, with no article content on the surface itself. |
@@ -62,14 +64,14 @@
 | `side-gallery` | Side Gallery | Asymmetric split section: a copy column of headline, supporting text, and links held against a clustered image collage opposite. Deliberately off-balance, unlike the centered hero. |
 | `shell-side-nav` | Side Nav | Application frame with a single collapsible, resizable left rail carrying grouped history and search, wrapping the main content. Vertical navigation only, no top bar. |
 | `table` | Simple Table | Flat row collection where columns sort, rows select into a bulk-action toolbar, and each row carries an overflow menu. Sortable but ungrouped, with no detail pane, the baseline shape. |
-| `theme-showcase` | Theme Showcase | Several unrelated product surfaces rendered together on one canvas so a token change can be judged across contexts at once. A comparison harness rather than a layout to ship. |
+| `theme-showcase` | Theme Showcase | Multi-surface comparison shell: preview palettes, typography, icons and control states across a storefront, checkout, chat and inventory on one responsive canvas. A theme preview and design-system showcase, with an embeddable content view for an existing app shell. |
 | `shell-top-nav` | Top Nav | Application frame with horizontal navigation only: a centered bar whose items open full-width mega-menu panels, over placeholder content that keeps the entire width. |
 | `table-tree` | Tree Table | Hierarchical table where every parent row rolls up from its children — a code repository whose folders show the newest commit beneath them, beside a detail sidebar and a rendered README. Columns resize, siblings sort within their own level, arrow keys walk the rows, and search prunes the tree to matching branches. |
 | `form-two-column` | Two-column Form | Form split into two columns beneath a hero header: inputs on one flank, a persistent context panel opposite that stays put while the fields scroll. Flat, single submit, no steps. |
 | `form-wizard-vertical` | Vertical Wizard | Multi-step wizard with the steps in a fixed left rail that stays visible while the form scrolls, plus a side panel whose guidance follows the focused field. Suits long or unequal steps carrying uploads, previews, and dense review metadata. As width tightens the guidance drops first, then the rail rotates into a horizontal stepper above the form. |
 | `work-item-detail` | Work Item Detail | Single work-item detail in two columns: a title with a status selector, a description, a subtask checklist with progress, an attachments block, and a comment and activity feed in the main column, plus a property rail with assignee, dates, labels, and linked items. The shape for any tracked item with children, properties, and a comment history — a task, ticket, issue, story, bug, card, request, or work item. |
 
-## 区块模板（前 60 个，共 711 个，全量见 astryx CLI）
+## 区块模板（前 60 个，共 721 个，全量见 astryx CLI）
 
 | id | 名称 |
 |---|---|
@@ -116,6 +118,7 @@
 | `BannerStatuses` | Banner — Statuses |
 | `BaseTypeaheadShowcase` | BaseTypeahead |
 | `BaseTypeaheadCustomSearch` | BaseTypeahead — Custom Search Bar |
+| `BaseTypeaheadMenu` | BaseTypeahead — Menu |
 | `DrawerShowcase` | Basic |
 | `BlockquoteShowcase` | Blockquote — Showcase |
 | `BlockquoteTestimonials` | Blockquote — Testimonials |
@@ -132,4 +135,3 @@
 | `BreadcrumbsShowcase` | Breadcrumbs |
 | `BreadcrumbsDeepHierarchy` | Breadcrumbs — Deep Path |
 | `BreadcrumbsWithIcons` | Breadcrumbs — Icons |
-| `BreadcrumbsMenuItem` | Breadcrumbs — Menu item |

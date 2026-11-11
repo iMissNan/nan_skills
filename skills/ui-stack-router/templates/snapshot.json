@@ -9,11 +9,11 @@
     "extraction_command": "astryx template <id> --skeleton"
   },
   "snapshot": {
-    "cli_version": "0.7.11",
-    "core_version": "0.7.11",
-    "extracted_at": "2026-11-10",
-    "page_templates": 57,
-    "aggregate_sha256": "ac689c7396724889ec8f65936aa81654ca57a3cd61a62a30ddc561de4a01cfe9"
+    "cli_version": "0.7.13",
+    "core_version": "0.7.13",
+    "extracted_at": "2026-11-11",
+    "page_templates": 58,
+    "aggregate_sha256": "5a1f4871b8267b4fe32fd569de3b55dda8ed2dff8a8a2addf523f8a7ab1348b9"
   },
   "refresh": {
     "how": "Run scripts/update_templates.py. It resolves the astryx CLI, re-extracts every page skeleton, rewrites templates/pages/, regenerates templates/INDEX.md, and writes this file.",

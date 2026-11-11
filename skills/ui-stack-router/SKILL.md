@@ -4,8 +4,8 @@ description: >
   做前端界面时选定 UI 组件库与页面模板，再写代码。新项目（还没有技术栈）
   和已有项目都适用：新项目直接用默认组合开工，已有项目先读 package.json
   再定库。当用户要做界面、改样式、美化页面、觉得 UI 难看或像 AI 生成时使用；
-  也用于组件库与框架不匹配、或多个模板不知道选哪个的情况。内含 57 个页面
-  模板骨架与 108 个组件到多框架的映射表，避免从零手写页面。
+  也用于组件库与框架不匹配、或多个模板不知道选哪个的情况。内含 58 个页面
+  模板骨架与 109 个组件到多框架的映射表，避免从零手写页面。
 ---
 
 # UI 技术栈路由
@@ -52,16 +52,26 @@ python "$SKILL_DIR/scripts/route_stack.py" "<项目目录>"
 | --- | --- |
 | `reuse_existing` | `package.json` 里已有 UI 库。直接用它，**不要新增第二个**。 |
 | `install_primary` | 未发现 UI 库。安装 `plan.primary`。 |
-| `greenfield` | **新项目，还没有技术栈。直接开工，不用追问。** |
+| `greenfield` | **新项目，连 `package.json` 都没有。直接开工，不用追问。** |
+| `framework_specific` | 框架已识别但无唯一组件库答案（Astro / Qwik / 未识别栈）。**先读依赖确认渲染层，不要套用默认组合。** |
+| `incompatible_version` | 框架主版本不满足要求（如 Vue 2）。按 `plan.decision_detail` 换等价库。 |
+
+**只有真空目录才走 `greenfield`。** 项目已有 `package.json`、只是没识别出
+框架时，脚本给 `framework_specific`，此时**必须**向用户报告探测结果并确认
+技术栈，不能当成新项目开工。
 
 **`greenfield` 是本 skill 最重要的分支**，处理不好就会卡住用户。
 
-用户说"我要做一个 XX 系统/页面，要好看"，而目录是空的或不存在时：
+用户说"我要做一个 XX 系统/页面，要好看"，而目录是空的（连 `package.json`
+都没有）时：
 
 - **不要**反问"你用什么框架"。用户来问设计，正是因为他不想操心技术选型。
 - **直接**采用 `plan.starter` 给出的默认组合（Vue 3 + Vite + Naive UI），
   一句话同步给用户："我先用 Vue 3 + Naive UI 起，样式最省事，你要换随时说。"
 - 然后**立刻进入第二、三步**选模板、定设计。技术细节后置。
+
+**目录不存在**时 `route_stack.py` 会返回 `not_a_directory`。此时按新项目处理
+即可（创建目录后重跑），不必追问。
 
 只有当用户**主动**说了框架（"我要用 React"）时，才按该框架走。
 
@@ -92,11 +102,11 @@ GitHub 星数；若表与实测不符，以实测为准，并更新本表。
 | --- | --- | --- | --- |
 | MUI | 13,836,129 | 中（Material） | 生态绝对第一 |
 | antd | 5,359,099 | 中上 | 国内企业后台事实标准 |
-| **astryx** | 661,968 | **最高** | Meta 出品，150+ 组件 + 预编译 CSS + **768 个页面/区块模板**，另有 agent CLI。要求 React ≥19 |
+| **astryx** | 661,968 | **最高** | Meta 出品，150+ 组件 + 预编译 CSS + **779 个页面/区块模板**（CLI 0.7.13），另有 agent CLI。要求 React ≥19 |
 
 **关于 astryx 的成熟度，必须告知用户**：仓库 2026-01 建仓（约 10 个月），版本
-0.7.11，README 自述 "Currently in Beta"。周下载量约为 MUI 的 1/21。它的好看很大
-程度来自**附带的 768 个免费页面模板**，而非组件本身更美。用于长期维护的生产
+0.7.13，README 自述 "Currently in Beta"。周下载量约为 MUI 的 1/21。它的好看很大
+程度来自**附带的 779 个免费页面模板**，而非组件本身更美。用于长期维护的生产
 项目有 API 变动与资料稀少的风险；做原型、内部工具、追求视觉质感时值得选。
 
 **不要把"好看"当作唯一理由推荐 astryx**，必须同时说明 Beta 状态与生态差距。
@@ -126,12 +136,22 @@ GitHub 星数；若表与实测不符，以实测为准，并更新本表。
 **这是本 skill 的核心。** 组件库只给零件，页面长什么样取决于布局决策。不做这
 一步，出来的就是"能跑但平庸"的页面 —— 这也是 AI 生成 UI 显丑的真正原因。
 
-astryx 之所以开箱好看，不是因为组件更美，而是它附带 **57 个页面模板 + 711 个
+astryx 之所以开箱好看，不是因为组件更美，而是它附带 **58 个页面模板 + 721 个
 区块模板**（免费，一条命令生成）。MUI、Naive UI、Element Plus 都**不带页面
 模板**，只发组件。所以这里把 astryx 的模板骨架抽成了离线库，供任意框架使用。
 
-**骨架是框架无关的**：只有布局结构与间距数值（`padding`、`gap`、嵌套层级），
-不含任何 React 语法。
+**骨架保留布局语义，但属性仍是 JSX 写法**：只有嵌套结构与间距数值
+（`padding`、`gap`、`columns`），组件名是 astryx 的，属性形如
+`padding={6}`、`columns={{minWidth: 320, repeat: 'fit'}}`。**需要按目标框架
+改写语法**，不能直接粘进 Vue 模板。
+
+**上游截断，务必注意**：astryx CLI 的 `--skeleton` 最多输出 35 行，超出部分
+以 `...` 省略（58 个骨架里 28 个如此）。看到 `...` 表示**该区块还有内容**，
+必须按模板的 `description` 自行补全尾部布局，不要当成占位符跳过。截断处
+可能留下未闭合的标签，补齐时注意闭合。
+
+**复合件需自行实现**：`MetricCard`、`ActiveUsersChart`、`BoardCard` 等
+不在 `component-map.json` 里，属模板自定义组合，按骨架中的角色自行实现。
 
 **按产品类型选模板：**
 
@@ -140,17 +160,17 @@ python "$SKILL_DIR/scripts/pick_template.py" "<产品描述>" --library <naive-u
 ```
 
 输出 `chosen`（选中模板）、`alternatives`（备选）、`skeleton`（原始骨架）、
-`translated`（已按目标库翻译组件名的骨架）。中文查询可直接用，如
-"后台管理系统"、"做个登录页"、"报表页"、"看板"。
+`annotated`（每个组件名后标注了目标库对应写法，仅作改写提示，不是可直接
+运行的代码）。中文查询可直接用，如"后台管理系统"、"做个登录页"、"报表页"、"看板"。
 
-**查看全部 57 个模板：**
+**查看全部 58 个模板：**
 
 ```bash
 python "$SKILL_DIR/scripts/pick_template.py" --list
 ```
 
 **模板清单见** `templates/INDEX.md`；**组件映射表见**
-`templates/component-map.json`（108 个原子组件 → 5 种目标库）。
+`templates/component-map.json`（109 个原子组件 → 5 种目标库）。
 
 映射表覆盖布局、排版、表单、数据、导航、浮层六类原子组件。剩余约 70 个是模板
 自定义的复合件（`MetricCard`、`ActiveUsersChart`、`BoardCard` 等），按骨架里的
@@ -209,8 +229,11 @@ python "$SKILL_DIR/scripts/search_style.py" --slug <风格id>
 与本风格库互补。`route_stack.py` 输出的 `plan.design_search_available` 指示其
 是否可用；未安装时跳过即可，风格库已够用。
 
+若可用，直接执行 `plan.design_search_command` 给出的命令（其中已带解析好的
+绝对路径）。它形如：
+
 ```bash
-python "$UIUX_SKILL/scripts/search.py" "<产品关键词>" --design-system -p "<项目名>"
+python "<ui-ux-pro-max>/scripts/search.py" "<产品关键词>" --design-system -p "<项目名>"
 ```
 
 ### 第五步：用库写，不要手搓

@@ -21,6 +21,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -66,8 +67,34 @@ def aggregate_hash(pages_dir):
     return h.hexdigest()
 
 
+def _cached_versions(cache_root):
+    """Map every cached astryx launcher to the CLI version it actually ships."""
+    entries = []
+    for entry in sorted(os.listdir(cache_root)):
+        pkg = os.path.join(cache_root, entry, "node_modules", "@astryxdesign", "cli", "package.json")
+        if not os.path.isfile(pkg):
+            continue
+        for name in ("astryx.cmd", "astryx"):
+            launcher = os.path.join(cache_root, entry, "node_modules", ".bin", name)
+            if os.path.isfile(launcher):
+                try:
+                    with open(pkg, encoding="utf-8") as fh:
+                        version = json.load(fh).get("version")
+                except (OSError, json.JSONDecodeError):
+                    version = None
+                entries.append((version or "0.0.0", launcher))
+                break
+    # Newest cache first; an unparseable version sorts last.
+    entries.sort(key=lambda item: item[0], reverse=True)
+    return entries
+
+
 def resolve_cli(pinned_version=None):
-    """Return a command list that runs the astryx CLI, or raise RuntimeError."""
+    """Return a command list that runs the astryx CLI, or raise RuntimeError.
+
+    A pinned version must match the cached copy exactly, otherwise a stale npx
+    cache would silently stand in for the version the caller asked for.
+    """
     spec = PACKAGE if not pinned_version else f"{PACKAGE}@{pinned_version}"
 
     # Prefer a locally cached npx copy: it avoids re-resolving the package on
@@ -86,11 +113,10 @@ def resolve_cli(pinned_version=None):
     for cache_root in cache_roots:
         if not os.path.isdir(cache_root):
             continue
-        for entry in os.listdir(cache_root):
-            for name in ("astryx.cmd", "astryx"):
-                candidate = os.path.join(cache_root, entry, "node_modules", ".bin", name)
-                if os.path.isfile(candidate):
-                    return [candidate], "npx-cache"
+        for version, launcher in _cached_versions(cache_root):
+            if pinned_version and version != pinned_version:
+                continue
+            return [launcher], f"npx-cache ({version})"
 
     # Fall back to npx, which downloads on first use.
     npx = shutil.which("npx")
@@ -142,6 +168,32 @@ def cli_version(cmd):
     return None
 
 
+def published_version():
+    """Ask the npm registry for the newest published CLI version.
+
+    `--check` must compare the snapshot against what is actually released.
+    Reading the version off the resolved binary only reports which cached copy
+    npx happened to pick, which can never show drift.
+
+    The URL is assembled from two module constants and then checked against the
+    allowlisted origin, so no caller can redirect this request elsewhere.
+    """
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    url = urllib.parse.urljoin(REGISTRY_ORIGIN, CLI_LATEST_PATH)
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or parsed.hostname != "registry.npmjs.org":
+        raise RuntimeError(f"拒绝向非预期主机发起请求: {url!r}")
+
+    try:
+        with urllib.request.urlopen(url, timeout=10) as fh:
+            return json.load(fh).get("version")
+    except (urllib.error.URLError, OSError, json.JSONDecodeError, AttributeError):
+        return None
+
+
 def fetch_page_ids(cmd):
     data = fetch_listing(cmd)
     entries = data.get("data", [])
@@ -160,12 +212,57 @@ def render(entry, text):
     return header + text + "\n"
 
 
+# Template ids come from the CLI's JSON listing, i.e. from an external process.
+# They are used as filenames, so only a plain slug is accepted; anything with a
+# separator, a drive letter or a parent segment is rejected before it reaches
+# the filesystem.
+SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+INDEX_NAME = "INDEX.md"
+
+# The only network endpoint this skill ever contacts. It is a fixed constant —
+# no part of it is composed from input — and the response is read for a version
+# string only.
+REGISTRY_ORIGIN = "https://registry.npmjs.org"
+CLI_LATEST_PATH = "/@astryxdesign%2Fcli/latest"
+
+
+def safe_template_path(out_dir, template_id):
+    """Join a template id onto out_dir, refusing ids that could escape it.
+
+    The id comes from the CLI's JSON listing, i.e. from an external process, so
+    it is treated as untrusted: only a plain slug is accepted, the result is
+    normalized, and it must stay inside out_dir.
+    """
+    if not isinstance(template_id, str) or not SAFE_ID.match(template_id):
+        raise RuntimeError(f"拒绝写入可疑的模板 id: {template_id!r}")
+    if template_id in (".", "..") or ".." in template_id:
+        raise RuntimeError(f"拒绝写入可疑的模板 id: {template_id!r}")
+    if os.path.basename(template_id) != template_id:
+        raise RuntimeError(f"拒绝写入可疑的模板 id: {template_id!r}")
+
+    root = os.path.realpath(out_dir)
+    path = os.path.realpath(os.path.join(root, template_id + ".txt"))
+    if os.path.commonpath([path, root]) != root:
+        raise RuntimeError(f"模板 id 越出输出目录: {template_id!r}")
+    return path
+
+
+def write_template_file(out_dir, template_id, payload):
+    """Validate, then write. Kept as one unit so the check cannot be skipped."""
+    path = safe_template_path(out_dir, template_id)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(payload)
+    return path
+
+
 def write_index(pages, blocks, out_dir, cli_version=None):
     """Regenerate templates/INDEX.md from the live CLI listing."""
     ver = f" {cli_version}" if cli_version else ""
     lines = ["# 页面模板索引", "",
              f"来源：astryx design system{ver} 的 `template --skeleton` 输出。",
-             "骨架只含布局结构与间距数值，**不含任何 React 语法**，可映射到任意框架。", "",
+             "骨架保留布局结构与间距数值（`padding`、`gap`、`columns`），"
+             "**属性仍是 JSX 写法**（如 `padding={6}`），需按目标框架改写语法。",
+             "上游最多输出 35 行，超出部分以 `...` 省略，须按 description 自行补全。", "",
              f"共 {len(pages)} 个页面模板，{len(blocks)} 个区块模板。", "",
              "> 更新：`python scripts/update_templates.py --write`。"
              "本文件与 `snapshot.json` 由该脚本重新生成。", "",
@@ -181,8 +278,27 @@ def write_index(pages, blocks, out_dir, cli_version=None):
         for t in blocks[:60]:
             lines.append(f"| `{t['id']}` | {t.get('name', '')} |")
 
-    with open(os.path.join(out_dir, "INDEX.md"), "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\n".join(lines) + "\n")
+    write_index_text(out_dir, "\n".join(lines) + "\n")
+
+
+def write_index_text(out_dir, text):
+    """Write INDEX.md inside out_dir, validating the resolved path first."""
+    root = os.path.realpath(out_dir)
+    path = os.path.realpath(os.path.join(root, INDEX_NAME))
+    if os.path.commonpath([path, root]) != root:
+        raise RuntimeError(f"INDEX 越出输出目录: {path!r}")
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text)
+
+
+def write_snapshot_text(snapshot_path, text):
+    """Write snapshot.json, validating the resolved path against its parent."""
+    root = os.path.realpath(os.path.dirname(snapshot_path))
+    path = os.path.realpath(snapshot_path)
+    if os.path.commonpath([path, root]) != root:
+        raise RuntimeError(f"snapshot 路径异常: {path!r}")
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text)
 
 
 def extract(cmd, pages, out_dir):
@@ -193,9 +309,7 @@ def extract(cmd, pages, out_dir):
         if rc != 0 or not text:
             failed.append({"id": entry["id"], "error": (err or out)[:200]})
             continue
-        with open(os.path.join(out_dir, entry["id"] + ".txt"), "w",
-                  encoding="utf-8", newline="\n") as fh:
-            fh.write(render(entry, text))
+        write_template_file(out_dir, entry["id"], render(entry, text))
         written += 1
     return written, failed
 
@@ -224,11 +338,13 @@ def main(argv):
         emit({"ok": False, "error": "cli_unavailable", "detail": str(exc)})
         return 1
 
+    newest = published_version()
     report = {
         "ok": True,
         "mode": "check" if args.check else ("write" if args.write else "dry-run"),
         "cli_source": source,
         "cli_version": latest,
+        "latest_published": newest,
         "snapshot_version": cur_ver,
         "template_count_local": len([f for f in os.listdir(PAGES_DIR) if f.endswith(".txt")])
         if os.path.isdir(PAGES_DIR) else 0,
@@ -236,7 +352,8 @@ def main(argv):
         "local_aggregate_sha256": local_hash,
         "snapshot_aggregate_sha256": cur_hash,
         "local_matches_snapshot": local_hash == cur_hash if cur_hash else None,
-        "version_drift": bool(cur_ver and latest and cur_ver != latest),
+        "version_drift": bool(cur_ver and newest and cur_ver != newest),
+        "network_used": True,
     }
 
     if args.check:
@@ -292,9 +409,8 @@ def main(argv):
             },
             "refresh": current.get("refresh", {}),
         }
-        with open(SNAPSHOT, "w", encoding="utf-8", newline="\n") as fh:
-            json.dump(snap, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
+        write_snapshot_text(SNAPSHOT,
+                            json.dumps(snap, indent=2, ensure_ascii=False) + "\n")
         if os.path.isdir(old):
             shutil.rmtree(old)
 

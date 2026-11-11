@@ -9,7 +9,9 @@
   /* header: */
   <Toolbar>
     <IconButton variant="ghost" />
+    <Icon />
     <IconButton variant="ghost" />
+    <Icon />
     <Text />
     <SegmentedControl />
     <SegmentedControlItem />
@@ -24,20 +26,18 @@
     /* content: */
     <LayoutContent padding={0}>
       <HStack height="100%">
-        <Section padding={2} variant="transparent" width={240}>
+        <StackItem />
+        <Section padding={2} variant="transparent" height="100%" width={240}>
           <List density="compact">
             <ListItem />
             <Icon />
             <Icon />
           </List>
         </Section>
+        <StackItem />
         <Section padding={6} variant="transparent">
           <VStack gap={4}>
             <Avatar />
             <VStack gap={1}>
               <Text />
-              <Text />
-            </VStack>
-            <MetadataList />
-            <MetadataListItem />
-            ...
+              ...

@@ -8,6 +8,7 @@ Usage:
     python detect_stack.py <project-dir> --json
 """
 
+import glob
 import json
 import os
 import sys
@@ -39,10 +40,13 @@ RUNTIME_MARKERS = [
 ]
 
 # UI libraries already present, so the router does not recommend a second one.
+# Every name here must exist on npm; `antdv`, `element-plus-vite` and
+# `@radix-ui/react` were removed because they are not published packages.
+# `tailwindcss` is a CSS utility, not a component library, so it is tracked
+# separately as `has_tailwind`.
 EXISTING_UI = [
     "naive-ui",
     "element-plus",
-    "element-plus-vite",
     "shadcn-vue",
     "reka-ui",
     "radix-vue",
@@ -51,7 +55,6 @@ EXISTING_UI = [
     "@headlessui/vue",
     "primevue",
     "ant-design-vue",
-    "antdv",
     "@arco-design/web-vue",
     "vant",
     "quasar",
@@ -61,11 +64,10 @@ EXISTING_UI = [
     "@mui/material",
     "@chakra-ui/react",
     "@mantine/core",
-    "@radix-ui/react",
+    "shadcn",
     "shadcn-ui",
-    "@headlessui/react",
-    "tailwindcss",
     "@shadcn/ui",
+    "@headlessui/react",
 ]
 
 CONFIG_FILES = [
@@ -96,13 +98,104 @@ def collect_deps(pkg):
     return deps
 
 
+# Files that mark a directory as a workspace container rather than an app.
+WORKSPACE_MARKERS = (
+    "pnpm-workspace.yaml",
+    "turbo.json",
+    "nx.json",
+    "lerna.json",
+    "rush.json",
+)
+
+
+def _deps_of(path):
+    try:
+        return collect_deps(read_json(path))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _is_workspace_container(path):
+    """True when a package.json only declares workspaces, not an application."""
+    try:
+        pkg = read_json(path)
+    except (OSError, json.JSONDecodeError):
+        return False
+    if pkg.get("workspaces"):
+        return True
+    # A private root with no runtime dependencies is a container too.
+    return bool(pkg.get("private")) and not pkg.get("dependencies")
+
+
+def _candidate_packages(root):
+    """package.json files one or two levels below a workspace root.
+
+    Skips node_modules and dot-directories so a deep dependency cannot be
+    mistaken for the project's own application.
+    """
+    found = []
+    patterns = (
+        os.path.join("apps", "*", "package.json"),
+        os.path.join("apps", "*", "*", "package.json"),
+        os.path.join("packages", "*", "package.json"),
+        os.path.join("packages", "*", "*", "package.json"),
+        os.path.join("frontend", "*", "package.json"),
+        os.path.join("services", "*", "package.json"),
+        os.path.join("*", "package.json"),
+    )
+    for pattern in patterns:
+        for path in sorted(glob.glob(os.path.join(root, pattern))):
+            parts = os.path.relpath(path, root).split(os.sep)
+            if any(p.startswith(".") or p == "node_modules" for p in parts):
+                continue
+            if path not in found:
+                found.append(path)
+    return found
+
+
 def find_package_json(root):
-    """Return the project's package.json, entering a single-package workspace."""
+    """Return the package.json that best represents this project's application.
+
+    A workspace root (pnpm / turbo / nx / npm `workspaces`) carries no framework
+    of its own. Reporting it as "unknown" would send the project down the
+    greenfield path and recommend a brand-new Vue stack into an existing React
+    repo, so the root is resolved to the most app-like package beneath it.
+    """
     direct = os.path.join(root, "package.json")
-    if os.path.isfile(direct):
+    if os.path.isfile(direct) and not _is_workspace_container(direct):
         return direct
 
-    for name in ("frontend", "web", "app", "client", "ui", "packages", "apps"):
+    is_workspace = any(
+        os.path.isfile(os.path.join(root, marker)) for marker in WORKSPACE_MARKERS
+    ) or (os.path.isfile(direct) and _is_workspace_container(direct))
+
+    # No manifest anywhere at the root: the project may still be a workspace
+    # laid out with apps/ or packages/ but no root package.json.
+    if not is_workspace and not os.path.isfile(direct):
+        is_workspace = any(
+            os.path.isdir(os.path.join(root, name))
+            for name in ("apps", "packages")
+        )
+
+    if is_workspace:
+        best, best_score = None, -1
+        for path in _candidate_packages(root):
+            deps = _deps_of(path)
+            score = 0
+            if any(marker in deps for marker, _, _ in FRAMEWORK_MARKERS):
+                score += 2
+            if any(marker in deps for marker, _, _ in RUNTIME_MARKERS):
+                score += 2
+            if any(name in deps for name in EXISTING_UI):
+                score += 1
+            if score > best_score:
+                best, best_score = path, score
+        if best:
+            return best
+        if os.path.isfile(direct):
+            return direct
+
+    for name in ("frontend", "web", "app", "client", "ui"):
         candidate = os.path.join(root, name, "package.json")
         if os.path.isfile(candidate):
             return candidate
@@ -124,6 +217,8 @@ def detect(root):
         "ok": True,
         "root": root,
         "package_json": pkg_path,
+        "package_json_is_root": pkg_path == os.path.join(root, "package.json"),
+        "has_package_json": pkg_path is not None,
         "framework": None,
         "framework_label": None,
         "runtime": None,

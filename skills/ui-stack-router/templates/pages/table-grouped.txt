@@ -3,7 +3,7 @@
 # description: Row collection bundled into collapsible sections with per-group counts, so a long list reads as a handful of blocks that expand and collapse. Query filtering and a resizable inspector for the selected row.
 
 # table-grouped - Row collection bundled into collapsible sections with per-group counts, so a long list reads as a handful of blocks that expand and collapse. Query filtering and a resizable inspector for the selected row.
-# Components: Avatar, Badge, Center, Dialog, Divider, DropdownMenu, Layout, MetadataList, Popover, PowerSearch, RadioList, React, ResizeHandle, Selector, StatusDot, Table, TableBody, TableCell, TableRow, TextInput
+# Components: Avatar, Badge, Center, Dialog, Divider, DropdownMenu, Layout, MetadataList, Popover, PowerSearch, RadioList, ResizeHandle, Selector, StatusDot, Table, TextInput
 
 <Layout padding={4} hasDivider height="fill">
   /* header: */
@@ -30,14 +30,14 @@
   /* content: */
   <LayoutContent padding={0} role="main">
     <Table columns={columns} density="balanced">
-      <TableBody />
-      <React />
-      <TableRow role="button" />
-      <TableCell />
-      <HStack gap={2}>
-        <Icon />
-        <Text />
-        <Badge variant="neutral" />
-      </HStack>
-      <TableRow />
-      ...
+      /* end: */
+      <ResizeHandle />
+      <TaskDetailPanel />
+      <Dialog>
+        <Layout>
+          /* header: */
+          <DialogHeader />
+          /* content: */
+          <LayoutContent padding={4}>
+            <VStack gap={4}>
+              ...

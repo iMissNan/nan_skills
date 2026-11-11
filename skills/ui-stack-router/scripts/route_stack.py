@@ -11,6 +11,7 @@ Usage:
 
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -78,7 +79,7 @@ ROUTES = {
         "primary": "shadcn-svelte",
         "package": "shadcn-svelte",
         "install": "npx shadcn-svelte@latest init",
-        "requires": "Svelte >= 4",
+        "requires": "Svelte >= 5",
         "why": "Svelte 生态下载量最高(300,511/周)，组件复制进项目，可深度定制。",
         "agent_setup": "n/a",
         "weekly_downloads": 300511,
@@ -114,6 +115,34 @@ ROUTES = {
         "mainstream": "取决于岛屿框架",
         "fallback": "纯 CSS + 设计 token",
         "fallback_package": "n/a",
+    },
+    "qwik": {
+        "tier": "框架专有",
+        "primary": "无成熟组件库",
+        "package": "n/a",
+        "install": "Qwik 生态暂无稳定 UI 组件库，用 @builder.io/qwik 原语自行实现",
+        "requires": "Qwik",
+        "why": "Qwik 的可恢复性模型与主流组件库不兼容，社区组件库均为早期状态。",
+        "agent_setup": "n/a",
+        "weekly_downloads": None,
+        "tradeoff": "无可靠第三方组件库，样式需自建。",
+        "mainstream": "Qwik 官方样式方案（CSS Modules / Tailwind）",
+        "fallback": "Tailwind + 设计 token",
+        "fallback_package": "tailwindcss",
+    },
+    "taro": {
+        "tier": "跨端小程序组件库",
+        "primary": "@nutui/nutui-react-taro",
+        "package": "@nutui/nutui-react-taro",
+        "install": "npm install @nutui/nutui-react-taro",
+        "requires": "Taro",
+        "why": "Taro 编译到小程序与 App，Web 组件库（依赖 DOM）在端内不可用。",
+        "agent_setup": "n/a",
+        "weekly_downloads": None,
+        "tradeoff": "仅限 Taro 生态；React 版与 Vue 版需按宿主框架选择。",
+        "mainstream": "NutUI Taro 版（京东官方）",
+        "fallback": "Taro UI（旧版，维护放缓）",
+        "fallback_package": "taro-ui",
     },
     "angular": {
         "tier": "组件库",
@@ -181,10 +210,29 @@ STACK_DATA = {
     "svelte": "svelte",
     "solid": "react",
     "astro": "astro",
+    "qwik": "react",
     "angular": "angular",
     "uniapp": "vue",
+    "taro": "react",
     "unknown": "html-tailwind",
 }
+
+# Runtimes that compile to a non-DOM host (mini-program, app shell). A Web
+# component library cannot run there, so the runtime outranks the framework
+# the project happens to declare alongside it.
+HOST_RUNTIMES = ("uniapp", "taro")
+
+
+def major_version(spec):
+    """Return the major version of a semver range, or None when unknown.
+
+    Handles the ranges that actually appear in package.json: "^3.4.0",
+    "~2.7.16", ">=3", "3.x", "workspace:*" (unknown), "latest" (unknown).
+    """
+    if not isinstance(spec, str):
+        return None
+    match = re.search(r"(\d+)", spec)
+    return int(match.group(1)) if match else None
 
 
 def run_detect(root):
@@ -201,15 +249,32 @@ def run_detect(root):
 
 
 def build_plan(detected):
-    framework = detected.get("framework") or detected.get("runtime") or "unknown"
+    # A mini-program runtime owns the stack even when the project also declares
+    # react/vue: those are the host framework, not the rendering target.
+    runtime = detected.get("runtime")
+    if runtime in HOST_RUNTIMES:
+        framework = runtime
+    else:
+        framework = detected.get("framework") or "unknown"
+
     route = dict(ROUTES.get(framework, ROUTES["unknown"]))
     route["framework"] = framework
     route["framework_label"] = detected.get("framework_label") or detected.get("runtime_label") or "unknown"
+    if runtime and runtime != framework:
+        route["host_runtime"] = runtime
+        route["host_runtime_label"] = detected.get("runtime_label")
 
     existing = detected.get("existing_ui") or []
     route["already_installed"] = existing
+    route["has_tailwind"] = bool(detected.get("has_tailwind"))
+    has_pkg = bool(detected.get("has_package_json", detected.get("package_json")))
 
-    # A project that already has a UI library must not be told to add a second one.
+    # Version gate: naive-ui needs Vue 3. A Vue 2 project must not be told to
+    # install it. Reported as its own decision so the caller sees the reason.
+    versions = detected.get("versions") or {}
+    vue_major = major_version(versions.get("vue"))
+    vue2 = framework == "vue" and vue_major is not None and vue_major < 3
+
     if existing:
         installed_primary = route["package"] in existing
         route["decision"] = "reuse_existing"
@@ -220,11 +285,29 @@ def build_plan(detected):
             route["decision_detail"] = (
                 f"项目已依赖 {route['primary']}（{route['package']}）。直接使用其组件，无需安装。"
             )
-    elif framework == "unknown" or route["package"] == "n/a":
-        # Greenfield: no stack yet. This must NOT block the design work. The
-        # user's goal is to pick a good-looking template and components, which
-        # is possible before a framework exists. Offer a starter stack instead
-        # of interrogating them.
+        else:
+            # The routed default is not what this project actually uses, so the
+            # plan must not keep advertising it as the primary choice.
+            route["primary"] = existing[0]
+            route["package"] = existing[0]
+            route["install"] = "n/a - 已安装，直接 import 使用"
+            route["why"] = f"项目现有的 UI 库是 {existing[0]}，复用它而不是引入第二套。"
+    elif vue2:
+        route["decision"] = "incompatible_version"
+        route["decision_detail"] = (
+            f"检测到 Vue {versions.get('vue')}，而 {route['primary']} 需要 {route['requires']}。"
+            "不要安装它——Vue 2 项目请用 Element UI（Vue 2 版）或 Vuetify 2，"
+            "或先迁移到 Vue 3。"
+        )
+        route["primary"] = "element-ui"
+        route["package"] = "element-ui"
+        route["install"] = "npm install element-ui"
+        route["requires"] = "Vue 2.x"
+        route["mainstream"] = "Element UI (Vue 2) 或 Vuetify 2"
+        route["vue_major"] = vue_major
+    elif not has_pkg and framework == "unknown":
+        # No package.json at all: a genuinely empty project. This must NOT block
+        # the design work. Offer a starter stack instead of interrogating them.
         route["decision"] = "greenfield"
         route["decision_detail"] = (
             "这是一个还没有技术栈的新项目。不要卡住追问框架——先按下面的默认组合开始设计，"
@@ -242,13 +325,35 @@ def build_plan(detected):
         route["why"] = STARTER_STACK["why"]
         route["framework"] = STARTER_STACK["framework"]
         route["framework_label"] = STARTER_STACK["framework_label"]
-        route["design_search_stack"] = STARTER_STACK["design_search_stack"]
         route["new_project"] = True
+    elif route["package"] == "n/a":
+        # Recognised framework with no single library answer (Astro、Qwik、未识别
+        # 但有 package.json 的项目)。It is NOT a new project — say so instead of
+        # silently rewriting the stack to Vue.
+        route["decision"] = "framework_specific"
+        if framework == "unknown":
+            route["decision_detail"] = (
+                "检测到项目已有 package.json，但没识别出前端框架或 UI 库。"
+                "先读依赖清单并向用户报告探测结果，确认技术栈后再选库，不要当成新项目开工。"
+            )
+        else:
+            route["decision_detail"] = (
+                f"{route['framework_label']} 的组件库取决于实际渲染层，没有唯一答案。"
+                "先确认项目内使用的岛屿/宿主框架（React / Vue / Svelte），再按对应路线走。"
+                "不要套用其他框架的默认组合。"
+            )
     else:
         route["decision"] = "install_primary"
         route["decision_detail"] = f"未检测到 UI 库。安装 {route['primary']}（{route['package']}）。"
+        if route["has_tailwind"]:
+            route["decision_detail"] += (
+                " 项目已有 Tailwind（样式层，不含组件）；若想与 Tailwind 同栈，"
+                "可优先考虑 shadcn 系（shadcn-vue / shadcn）。"
+            )
 
-    route["design_search_stack"] = STACK_DATA.get(framework, "html-tailwind")
+    # The design-search stack must follow the framework actually decided on,
+    # including the greenfield starter, so it is assigned exactly once here.
+    route["design_search_stack"] = STACK_DATA.get(route["framework"], "html-tailwind")
     # ui-ux-pro-max is an optional companion skill. Report the resolved path
     # when present, and an explicit null when it is not installed, so callers
     # never receive a command pointing at a path that does not exist.

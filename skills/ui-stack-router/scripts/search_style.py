@@ -8,7 +8,6 @@ Usage:
     python search_style.py "拟物 按钮"                 # keyword search
     python search_style.py --slug skeuomorphism        # full entry by slug
     python search_style.py --list                      # all slugs + names
-    python search_style.py "dashboard" --field tokens  # one field of top hit
 
 Output: UTF-8 JSON on stdout (GBK-console safe).
 """
